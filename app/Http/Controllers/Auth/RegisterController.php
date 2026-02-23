@@ -14,7 +14,7 @@ final readonly class RegisterController
 {
     public function create(): View
     {
-        return view('register');
+        return view('auth.register');
     }
 
     public function store(StoreUserRequest $request, CreateUserAction $action): RedirectResponse
@@ -24,7 +24,7 @@ final readonly class RegisterController
         Auth::login($user);
         session()->regenerate();
 
-        return to_route('test')
+        return to_route('dashboard')
             ->with('success', 'Registration successful.');
     }
 }
