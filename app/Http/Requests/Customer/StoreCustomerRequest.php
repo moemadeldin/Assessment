@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests\Auth;
+namespace App\Http\Requests\Customer;
 
 use App\Rules\NoNumbers;
 use Illuminate\Foundation\Http\FormRequest;
 
-final class StoreUserRequest extends FormRequest
+final class StoreCustomerRequest extends FormRequest
 {
     /**
      * @return array<string, list<string>|string>
@@ -16,8 +16,9 @@ final class StoreUserRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255', new NoNumbers()],
-            'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'confirmed', 'min:8', 'max:88'],
+            'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:customers,email'],
+            'phone' => ['nullable', 'string', 'digits:11'],
+            'address' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

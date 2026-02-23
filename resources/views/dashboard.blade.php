@@ -29,7 +29,8 @@
     <div class="p-6">
         <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-xl shadow-2xl">
             <h2 class="text-2xl font-bold mb-4">Welcome, {{ Auth::user()->name }}!</h2>
-            <p class="text-gray-400">You are now logged in.</p>
+            <p class="text-gray-400 mb-6">You are now logged in.</p>
+            <a href="{{ route('customers.index') }}" class="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition">Manage Customers</a>
         </div>
     </div>
 

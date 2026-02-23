@@ -9,6 +9,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
@@ -42,6 +43,11 @@ final class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    public function user(): HasMany
+    {
+        return $this->hasMany(Customer::class);
+    }
 
     /**
      * Get the attributes that should be cast.
