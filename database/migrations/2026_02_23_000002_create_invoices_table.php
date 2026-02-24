@@ -25,6 +25,7 @@ return new class extends Migration
             $table->decimal('tax', 10, 2)->default(0);
             $table->decimal('tax_rate', 5, 2)->default(0);
             $table->decimal('total', 10, 2)->default(0);
+            $table->decimal('sales_return_total', 10, 2)->default(0);
             $table->string('status')->default(InvoiceStatus::Draft->value);
             $table->date('due_date')->nullable();
             $table->text('notes')->nullable();

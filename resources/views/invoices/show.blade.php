@@ -3,6 +3,9 @@
 @section('title', 'Invoice Details')
 
 @section('content')
+@php
+    use App\Enums\InvoiceStatus;
+@endphp
     <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div class="bg-slate-800 rounded-2xl p-8 shadow-2xl">
             <h1 class="text-2xl font-semibold text-slate-50 mb-1">Invoice</h1>
@@ -56,7 +59,12 @@
             <div class="mt-6 text-right space-y-2">
                 <p class="text-slate-200">Subtotal: ${{ $invoice->formatted_subtotal }}</p>
                 <p class="text-slate-200">Tax: ${{ $invoice->formatted_tax }}</p>
-                <p class="text-green-400 text-xl font-semibold">Total: ${{ $invoice->formatted_total }}</p>
+                @if($invoice->sales_return_total > 0)
+                    <p class="text-red-400">Returns: -${{ $invoice->formatted_sales_return_total }}</p>
+                    <p class="text-green-400 text-xl font-semibold">Adjusted Total: ${{ $invoice->formatted_adjusted_total }}</p>
+                @else
+                    <p class="text-green-400 text-xl font-semibold">Total: ${{ $invoice->formatted_total }}</p>
+                @endif
             </div>
 
             @if($invoice->notes)
@@ -75,11 +83,23 @@
                     class="px-6 py-3 rounded-lg text-white font-semibold text-sm bg-slate-700 hover:bg-slate-600 transition-all">
                     Edit
                 </a>
+                <a href="{{ route('invoices.print', $invoice) }}" target="_blank"
+                    class="px-6 py-3 rounded-lg text-white font-semibold text-sm bg-slate-600 hover:bg-slate-500 transition-all">
+                    Print
+                </a>
+                @if($invoice->status === InvoiceStatus::Paid)
+                        <a href="{{ route('sales-returns.create', $invoice->id) }}"
+                            class="px-6 py-3 rounded-lg text-white font-semibold text-sm bg-amber-600 hover:bg-amber-500 transition-all"
+                            title="Record Return">
+                            Return
+                        </a>
+                        
+                @endif
                 <form action="{{ route('invoices.destroy', $invoice) }}" method="POST" class="inline">
                     @csrf
                     @method('DELETE')
                     <button type="submit"
-                        class="cursor-pointer px-6 py-3 rounded-lg text-white font-semibold text-sm bg-gradient-to-r from-red-500 to-red-600 hover:shadow-lg transition-all"
+                        class="cursor-pointer px-6 py-3 rounded-lg text-white font-semibold text-sm bg-red-600 hover:bg-red-500 transition-all"
                         onclick="return confirm('Are you sure?')">
                         Delete
                     </button>

@@ -6,7 +6,6 @@ namespace App\Http\Requests\Customer;
 
 use App\Rules\NoNumbers;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 final class StoreCustomerRequest extends FormRequest
 {

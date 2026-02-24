@@ -61,6 +61,9 @@
                         <input type="date" name="due_date" id="due_date"
                             value="{{ old('due_date', $invoice->due_date ? $invoice->due_date->format('Y-m-d') : '') }}"
                             class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-50 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
+                        @error('due_date')
+                            <div class="mt-1 text-sm text-red-400">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
 

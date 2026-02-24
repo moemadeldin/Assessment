@@ -83,7 +83,15 @@
                         <tr class="hover:bg-slate-700/50 transition-colors">
                             <td class="px-6 py-4 text-sm text-slate-200">{{ $invoice->invoice_number }}</td>
                             <td class="px-6 py-4 text-sm text-slate-200">{{ $invoice->customer->name }}</td>
-                            <td class="px-6 py-4 text-sm text-slate-200">${{ $invoice->formatted_total }}</td>
+                            <td class="px-6 py-4 text-sm text-slate-200">
+                                @if($invoice->sales_return_total > 0)
+                                    <span class="text-red-400 line-through">${{ $invoice->formatted_total }}</span>
+                                    <br>
+                                    <span class="text-green-400">${{ $invoice->formatted_adjusted_total }}</span>
+                                @else
+                                    ${{ $invoice->formatted_total }}
+                                @endif
+                            </td>
                             <td class="px-6 py-4 text-sm">
                                 <span class="px-3 py-1 text-sm rounded {{ $invoice->status->badgeClass() }}">
                                     {{ $invoice->status->label() }}
@@ -101,6 +109,13 @@
                                         class="px-4 py-2 rounded-lg text-white font-semibold text-xs gradient-primary hover:shadow-lg transition-all">
                                         View
                                     </a>
+                                    @if($invoice->status === InvoiceStatus::Paid)
+                                        <a href="{{ route('sales-returns.create', $invoice->id) }}"
+                                            class="px-4 py-2 rounded-lg text-white font-semibold text-xs bg-amber-600 hover:bg-amber-500 transition-all"
+                                            title="Record Return">
+                                            Return
+                                        </a>
+                                    @endif
                                     <a href="{{ route('invoices.edit', $invoice) }}"
                                         class="px-4 py-2 rounded-lg text-white font-semibold text-xs bg-slate-700 hover:bg-slate-600 transition-all">
                                         Edit

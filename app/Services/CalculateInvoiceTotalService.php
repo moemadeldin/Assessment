@@ -9,7 +9,7 @@ use App\DTOs\Invoices\InvoiceTotals;
 
 final readonly class CalculateInvoiceTotalService
 {
-    public function calculate(array $items, float $taxAmount = 0.0): InvoiceTotals
+    public function calculate(array $items, float $taxRate = 0.0): InvoiceTotals
     {
         $subtotal = array_reduce(
             $items,
@@ -17,11 +17,12 @@ final readonly class CalculateInvoiceTotalService
             0.0,
         );
 
-        $total = $subtotal + $taxAmount;
+        $tax = $subtotal * ($taxRate / 100);
+        $total = $subtotal + $tax;
 
         return new InvoiceTotals(
             subtotal: round($subtotal, 2),
-            tax: round($taxAmount, 2),
+            tax: round($tax, 2),
             total: round($total, 2),
         );
     }

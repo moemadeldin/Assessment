@@ -29,7 +29,7 @@ final readonly class CreateInvoiceAction
                 'notes' => $data->notes,
             ]);
             $this->createMany($data, $invoice);
-            $this->invoiceItemSync->applyTotals($invoice, $data->items, $data->taxAmount);
+            $this->invoiceItemSync->applyTotals($invoice, $data->items, $data->taxRate);
 
             return $invoice;
         });

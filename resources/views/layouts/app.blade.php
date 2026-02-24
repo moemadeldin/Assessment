@@ -89,6 +89,10 @@
                                 class="inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-200 hover:text-slate-50 border-b-2 border-transparent hover:border-indigo-500 transition-colors">
                                 Invoices
                             </a>
+                            <a href="{{ route('sales-returns.index') }}"
+                                class="inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-200 hover:text-slate-50 border-b-2 border-transparent hover:border-indigo-500 transition-colors">
+                                Sales Returns
+                            </a>
                         </div>
                     </div>
 

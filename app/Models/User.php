@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
@@ -33,6 +34,7 @@ final class User extends Authenticatable
     use HasFactory;
     use HasUuids;
     use Notifiable;
+    use SoftDeletes;
 
     /**
      * The attributes that should be hidden for serialization.
@@ -44,9 +46,19 @@ final class User extends Authenticatable
         'remember_token',
     ];
 
-    public function user(): HasMany
+    public function customers(): HasMany
     {
         return $this->hasMany(Customer::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Customer::class);
+    }
+
+    public function salesReturns(): HasMany
+    {
+        return $this->hasMany(SalesReturn::class);
     }
 
     /**

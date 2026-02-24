@@ -30,13 +30,30 @@ final readonly class InvoiceItemSyncService
         );
     }
 
-    public function applyTotals(Invoice $invoice, array $items, float $taxAmount): void
+    public function applyTotals(Invoice $invoice, array $items, float $taxRate): void
     {
-        $totals = $this->calculateTotals->calculate($items, $taxAmount);
+        $totals = $this->calculateTotals->calculate($items, $taxRate);
         $invoice->update([
             'subtotal' => $totals->subtotal,
+            'tax_rate' => $taxRate,
             'tax' => $totals->tax,
             'total' => $totals->total,
+        ]);
+    }
+
+    public function recalculateInvoiceTotals(Invoice $invoice): void
+    {
+        $items = $invoice->items()->get();
+        $taxRate = (float) $invoice->tax_rate;
+
+        $subtotal = $items->sum('total');
+        $tax = $subtotal * ($taxRate / 100);
+        $total = $subtotal + $tax;
+
+        $invoice->update([
+            'subtotal' => $subtotal,
+            'tax' => $tax,
+            'total' => $total,
         ]);
     }
 }

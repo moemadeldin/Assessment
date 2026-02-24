@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Models\Invoice;
+use App\Models\SalesReturn;
 use App\Observers\InvoiceObserver;
+use App\Observers\SalesReturnObserver;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -32,6 +34,7 @@ final class AppServiceProvider extends ServiceProvider
         Model::shouldBeStrict();
         $this->configureRateLimiting();
         Invoice::observe(InvoiceObserver::class);
+        SalesReturn::observe(SalesReturnObserver::class);
     }
 
     private function configureRateLimiting(): void
