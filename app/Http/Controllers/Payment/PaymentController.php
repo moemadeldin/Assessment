@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Queries\Payment\GetPaymentsQuery;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 final readonly class PaymentController
@@ -33,8 +34,10 @@ final readonly class PaymentController
         ]);
     }
 
-    public function create(?string $invoice_id = null): View
+    public function create(Request $request): View
     {
+        $invoiceId = $request->query('invoice');
+
         $invoices = Invoice::query()
             ->withCustomerAndUsers()
             ->whereNotIn('status', [InvoiceStatus::Paid,
@@ -43,14 +46,19 @@ final readonly class PaymentController
             ->get();
 
         $selectedInvoice = null;
-        if ($invoice_id) {
-            $selectedInvoice = Invoice::with(['items', 'customer', 'payments'])->find($invoice_id);
+        if ($invoiceId) {
+            $selectedInvoice = Invoice::with(['items', 'customer', 'payments'])
+                ->find($invoiceId);
+
+            if ($selectedInvoice) {
+                $invoices = $invoices->push($selectedInvoice);
+            }
         }
 
         return view('payments.create', [
             'invoices' => $invoices,
             'selectedInvoice' => $selectedInvoice,
-            'invoice_id' => $invoice_id,
+            'invoice_id' => $invoiceId,
         ]);
     }
 

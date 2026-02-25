@@ -121,7 +121,7 @@
                                             InvoiceStatus::Returned,
                                             InvoiceStatus::Cancelled
                                         ]))
-                                        <a href="{{ route('payments.create', $invoice->id) }}"
+                                        <a href="{{ route('payments.create', ['invoice' => $invoice->id]) }}"
                                             class="px-4 py-2 rounded-lg text-white font-semibold text-xs bg-blue-600 hover:bg-blue-500 transition-all"
                                             title="Record Payment">
                                             Pay

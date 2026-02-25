@@ -123,15 +123,16 @@ final class Invoice extends Model
     protected function paidAmount(): Attribute
     {
         return Attribute::make(
-            get: fn (): float => (float) $this->payments()->sum('amount'),
+            get: fn (): float => round((float) $this->payments()->sum('amount'), 2),
         );
     }
 
     protected function remainingAmount(): Attribute
     {
+
         return Attribute::make(
 
-            get: fn (): float => max(0.0, (float) $this->total - $this->paid_amount),
+            get: fn (): float => round((float) $this->total - $this->paid_amount, 2),
         );
     }
 
@@ -255,7 +256,7 @@ final class Invoice extends Model
     protected function overdue(Builder $query): Builder
     {
         return $query->where('due_date', '<', now()->toDateString())
-            ->where('status', '!=', InvoiceStatus::Paid->value);
+            ->where('status', '!=', InvoiceStatus::Paid);
     }
 
     #[Scope]

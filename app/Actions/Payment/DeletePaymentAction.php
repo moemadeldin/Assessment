@@ -29,7 +29,7 @@ final readonly class DeletePaymentAction
 
     private function revertInvoiceStatus(Invoice $invoice): void
     {
-        $totalPaid = (float) $invoice->payments()->sum('amount');
+        $totalPaid = round((float) $invoice->payments()->sum('amount'), 2);
         $invoiceTotal = (float) $invoice->total;
 
         if ($totalPaid < $invoiceTotal && $invoice->status === InvoiceStatus::Paid) {

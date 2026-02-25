@@ -7,6 +7,7 @@ namespace App\Queries\Customer;
 use App\DTOs\CustomerStatement\CustomerStatementData;
 use App\DTOs\CustomerStatement\CustomerStatementResult;
 use App\DTOs\CustomerStatement\CustomerStatementSummary;
+use App\Enums\SalesReturnStatus;
 use App\Models\Customer;
 use Illuminate\Support\Collection;
 
@@ -60,7 +61,7 @@ final readonly class GetCustomerStatementQuery
     private function mapReturns(Customer $customer): Collection
     {
         return $customer->salesReturns()
-            ->where('status', 'approved')
+            ->where('status', SalesReturnStatus::Approved)
             ->oldest('return_date')
             ->get()
             ->map(fn ($return): CustomerStatementData => new CustomerStatementData(

@@ -22,7 +22,7 @@
                         class="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-50 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20">
                         <option value="">Select Invoice</option>
                         @foreach($invoices as $invoice)
-                            <option value="{{ $invoice->id }}" {{ $invoice_id == $invoice->id ? 'selected' : '' }}>
+                            <option value="{{ $invoice->id }}" {{ $invoice_id && $invoice_id === (string)$invoice->id ? 'selected' : '' }}>
                                 {{ $invoice->invoice_number }} - {{ $invoice->customer->name }} -
                                 ${{ number_format((float) $invoice->total, 2) }}
                             </option>

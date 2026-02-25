@@ -59,6 +59,8 @@ final readonly class SalesReturnController
 
     public function edit(SalesReturn $salesReturn): View
     {
+        $salesReturn->load('items');
+
         $invoice = null;
         if ($salesReturn->invoice_id) {
             $invoice = Invoice::with(['items', 'customer', 'user'])->find($salesReturn->invoice_id);

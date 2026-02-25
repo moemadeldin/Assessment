@@ -74,7 +74,7 @@ final readonly class CreateSalesReturnAction
             'return_date' => $data['return_date'],
             'reason' => $data['reason'],
             'notes' => $data['notes'] ?? null,
-            'status' => $data['status'] ?? 'pending',
+            'status' => $data['status'] ?? SalesReturnStatus::Pending->value,
             'subtotal' => $subtotal,
             'tax' => 0,
             'total' => $subtotal,

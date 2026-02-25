@@ -4,43 +4,82 @@ declare(strict_types=1);
 
 namespace App\Queries\Report;
 
+use App\Enums\SalesReturnStatus;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\SalesReturn;
+use App\Utils\Constants;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Collection;
 
 final readonly class GetMonthlySalesReportQuery
 {
     public function execute(int $year, int $month): array
     {
-        $invoices = Invoice::query()
-            ->with('customer')
-            ->whereYear('invoice_date', $year)
-            ->whereMonth('invoice_date', $month)
-            ->get();
+        $allInvoices = $this->getInvoicesForPeriod($year, $month, false);
+        $returns = $this->getReturnsForPeriod($year, $month);
+        $payments = $this->getPaymentsForPeriod($year, $month);
+        $invoices = $this->getInvoicesForPeriod($year, $month, true);
 
-        $totalSales = $invoices->sum(fn ($invoice): float => (float) $invoice->total - (float) ($invoice->sales_return_total ?? 0));
-
-        $returns = SalesReturn::query()
-            ->whereYear('return_date', $year)
-            ->whereMonth('return_date', $month)
-            ->where('status', 'approved')
-            ->get();
-        $totalReturns = $returns->sum('total');
-
-        $payments = Payment::query()
-            ->whereYear('payment_date', $year)
-            ->whereMonth('payment_date', $month)
-            ->get();
-        $totalPayments = $payments->sum('amount');
-
-        $netSales = $totalSales - $totalReturns;
+        $totalSales = $this->calculateTotalSales($allInvoices);
+        $totalReturns = $this->calculateTotalReturns($returns);
+        $totalPayments = $this->calculateTotalPayments($payments);
 
         return [
             'invoices' => $invoices,
             'total_sales' => $totalSales,
             'total_returns' => $totalReturns,
             'total_payments' => $totalPayments,
-            'net_sales' => $netSales,
+            'net_sales' => $totalSales - $totalReturns,
         ];
+    }
+
+    private function getInvoicesForPeriod(int $year, int $month, bool $paginate = false): Paginator|Collection
+    {
+        $query = Invoice::query()
+            ->with('customer')
+            ->withSum(['salesReturns as return_total' => function ($query): void {
+                $query->where('status', SalesReturnStatus::Approved);
+            }], 'total')
+            ->whereYear('invoice_date', $year)
+            ->whereMonth('invoice_date', $month);
+
+        if ($paginate) {
+            return $query->simplePaginate(Constants::NUMBER_OF_PAGINATED_REPORTS);
+        }
+
+        return $query->get();
+    }
+
+    private function getReturnsForPeriod(int $year, int $month): Collection
+    {
+        return SalesReturn::query()
+            ->whereYear('return_date', $year)
+            ->whereMonth('return_date', $month)
+            ->where('status', SalesReturnStatus::Approved)
+            ->get();
+    }
+
+    private function getPaymentsForPeriod(int $year, int $month): Collection
+    {
+        return Payment::query()
+            ->whereYear('payment_date', $year)
+            ->whereMonth('payment_date', $month)
+            ->get();
+    }
+
+    private function calculateTotalSales(Collection $invoices): float
+    {
+        return (float) $invoices->sum(fn (Invoice $invoice): float => $invoice->total - (float) ($invoice->return_total ?? 0));
+    }
+
+    private function calculateTotalReturns(Collection $returns): float
+    {
+        return (float) $returns->sum('total');
+    }
+
+    private function calculateTotalPayments(Collection $payments): float
+    {
+        return (float) $payments->sum('amount');
     }
 }

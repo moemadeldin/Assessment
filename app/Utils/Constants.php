@@ -13,4 +13,8 @@ final readonly class Constants
     public const int NUMBER_OF_PAGINATED_SALES_RETURNS = 5;
 
     public const int NUMBER_OF_PAGINATED_PAYMENTS = 5;
+
+    public const int NUMBER_OF_TOP_CUSTOMERS_LIMIT = 10;
+
+    public const int NUMBER_OF_PAGINATED_REPORTS = 10;
 }
