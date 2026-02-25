@@ -30,7 +30,6 @@ Route::middleware('auth')->group(function (): void {
             'customers' => CustomerController::class,
             'payments' => PaymentController::class,
         ]);
-        // Route::resource('payments', PaymentController::class)->except(['edit', 'update']);
         Route::resource('sales-returns', SalesReturnController::class)->except(['create']);
         Route::controller(CustomerStatementController::class)->group(function (): void {
             Route::get('/statements/customers', 'index')->name('customers.statements.index');

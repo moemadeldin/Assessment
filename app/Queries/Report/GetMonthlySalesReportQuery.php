@@ -16,12 +16,12 @@ final readonly class GetMonthlySalesReportQuery
 {
     public function execute(int $year, int $month): array
     {
-        $allInvoices = $this->getInvoicesForPeriod($year, $month, false);
-        $returns = $this->getReturnsForPeriod($year, $month);
-        $payments = $this->getPaymentsForPeriod($year, $month);
         $invoices = $this->getInvoicesForPeriod($year, $month, true);
 
-        $totalSales = $this->calculateTotalSales($allInvoices);
+        $totalSales = $this->calculateTotalSales($year, $month);
+        $returns = $this->getReturnsForPeriod($year, $month);
+        $payments = $this->getPaymentsForPeriod($year, $month);
+
         $totalReturns = $this->calculateTotalReturns($returns);
         $totalPayments = $this->calculateTotalPayments($payments);
 
@@ -51,6 +51,30 @@ final readonly class GetMonthlySalesReportQuery
         return $query->get();
     }
 
+    private function calculateTotalSales(int $year, int $month): float
+    {
+        $invoices = Invoice::query()
+            ->whereYear('invoice_date', $year)
+            ->whereMonth('invoice_date', $month)
+            ->select('id', 'total')
+            ->get();
+
+        if ($invoices->isEmpty()) {
+            return 0.0;
+        }
+
+        $totalInvoiceAmount = (float) $invoices->sum('total');
+
+        $invoiceIds = $invoices->pluck('id');
+
+        $totalReturns = (float) SalesReturn::query()
+            ->whereIn('invoice_id', $invoiceIds)
+            ->where('status', SalesReturnStatus::Approved)
+            ->sum('total');
+
+        return $totalInvoiceAmount - $totalReturns;
+    }
+
     private function getReturnsForPeriod(int $year, int $month): Collection
     {
         return SalesReturn::query()
@@ -66,11 +90,6 @@ final readonly class GetMonthlySalesReportQuery
             ->whereYear('payment_date', $year)
             ->whereMonth('payment_date', $month)
             ->get();
-    }
-
-    private function calculateTotalSales(Collection $invoices): float
-    {
-        return (float) $invoices->sum(fn (Invoice $invoice): float => $invoice->total - (float) ($invoice->return_total ?? 0));
     }
 
     private function calculateTotalReturns(Collection $returns): float

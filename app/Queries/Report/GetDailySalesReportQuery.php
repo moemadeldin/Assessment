@@ -16,21 +16,16 @@ final readonly class GetDailySalesReportQuery
 {
     public function execute(string $date): array
     {
-        $allInvoices = $this->getInvoicesForDate($date, false);
-        $returns = $this->getReturnsForDate($date);
-        $payments = $this->getPaymentsForDate($date);
         $invoices = $this->getInvoicesForDate($date, true);
 
-        $totalSales = $this->calculateTotalSales($allInvoices);
-        $totalReturns = $this->calculateTotalReturns($returns);
-        $totalPayments = $this->calculateTotalPayments($payments);
+        $totals = $this->calculateAllTotals($date);
 
         return [
             'invoices' => $invoices,
-            'total_sales' => $totalSales,
-            'total_returns' => $totalReturns,
-            'total_payments' => $totalPayments,
-            'net_sales' => $totalSales - $totalReturns,
+            'total_sales' => $totals['total_sales'],
+            'total_returns' => $totals['total_returns'],
+            'total_payments' => $totals['total_payments'],
+            'net_sales' => $totals['total_sales'] - $totals['total_returns'],
         ];
     }
 
@@ -50,33 +45,38 @@ final readonly class GetDailySalesReportQuery
         return $query->get();
     }
 
-    private function getReturnsForDate(string $date): Collection
+    private function calculateAllTotals(string $date): array
     {
-        return SalesReturn::query()
-            ->whereDate('return_date', $date)
+        $invoices = Invoice::query()
+            ->whereDate('invoice_date', $date)
+            ->select('id', 'total')
+            ->get();
+
+        $totalInvoiceAmount = (float) $invoices->sum('total');
+
+        if ($invoices->isEmpty()) {
+            return [
+                'total_sales' => 0.0,
+                'total_returns' => 0.0,
+                'total_payments' => 0.0,
+            ];
+        }
+
+        $invoiceIds = $invoices->pluck('id');
+
+        $totalReturns = (float) SalesReturn::query()
+            ->whereIn('invoice_id', $invoiceIds)
             ->where('status', SalesReturnStatus::Approved)
-            ->get();
-    }
+            ->sum('total');
 
-    private function getPaymentsForDate(string $date): Collection
-    {
-        return Payment::query()
+        $totalPayments = (float) Payment::query()
             ->whereDate('payment_date', $date)
-            ->get();
-    }
+            ->sum('amount');
 
-    private function calculateTotalSales(Collection $invoices): float
-    {
-        return (float) $invoices->sum(fn (Invoice $invoice): float => $invoice->total - (float) ($invoice->return_total ?? 0));
-    }
-
-    private function calculateTotalReturns(Collection $returns): float
-    {
-        return (float) $returns->sum('total');
-    }
-
-    private function calculateTotalPayments(Collection $payments): float
-    {
-        return (float) $payments->sum('amount');
+        return [
+            'total_sales' => $totalInvoiceAmount,
+            'total_returns' => $totalReturns,
+            'total_payments' => $totalPayments,
+        ];
     }
 }
